@@ -87,7 +87,7 @@ var RATING = {
     max: 900
   }
 };
-var NUTRITION_FACTS = {
+var nutritionFacts = {
   sugar: getRandomInt(0, 1),
   energy: {
     min: 70,
@@ -117,16 +117,15 @@ var getArrayOfObjects = function (objetsCount) {
         number: getRandomInt(RATING.number.min, RATING.number.max)
       },
       nutritionFacts: {
-        sugar: NUTRITION_FACTS.sugar,
-        energy: getRandomInt(NUTRITION_FACTS.energy.min, NUTRITION_FACTS.energy.max),
-        contents: NUTRITION_FACTS.contents
+        sugar: nutritionFacts.sugar,
+        energy: getRandomInt(nutritionFacts.energy.min, nutritionFacts.energy.max),
+        contents: nutritionFacts.contents
       }
     };
     goods.push(goodsItem);
   }
   return goods;
 };
-// console.log(getArrayOfObjects(CATALOG_ELEMENTS_COUNT));
 
 // part 2
 var catalog = document.querySelector('.catalog');
@@ -177,20 +176,20 @@ var renderCatalogCard = function (item) {
   return cardItem;
 };
 
-var getFragment = function (arrayOfCards) {
+var getFragment = function (renderFunction, arrayOfCardsObjects) {
   var fragment = document.createDocumentFragment();
 
-  for (var i = 0; i < arrayOfCards.length; ++i) {
-    fragment.appendChild(renderCatalogCard(arrayOfCards[i]));
+  for (var i = 0; i < arrayOfCardsObjects.length; ++i) {
+    fragment.appendChild(renderFunction(arrayOfCardsObjects[i]));
   }
   return fragment;
 };
 var catalogCardsContainer = catalog.querySelector('.catalog__cards');
-var renderItemsInContainer = function (arrayOfCardsObjects, classOfContainer) {
-  classOfContainer.appendChild(getFragment(arrayOfCardsObjects));
+var renderItemsInContainer = function (renderFunction, arrayOfCardsObjects, classOfContainer) {
+  classOfContainer.appendChild(getFragment(renderFunction, arrayOfCardsObjects));
 };
 
-renderItemsInContainer(getArrayOfObjects(CATALOG_ELEMETS_COUNT), catalogCardsContainer);
+renderItemsInContainer(renderCatalogCard, getArrayOfObjects(CATALOG_ELEMETS_COUNT), catalogCardsContainer);
 
 // part 3
 var orderCardTemplate = document.querySelector('#card-order').content.querySelector('.card-order');
@@ -205,13 +204,5 @@ var renderOrderList = function (item) {
   cardItem.querySelector('.card-order__price').textContent = item.price + ' ₽';
   return cardItem;
 };
-var getFragment = function (arrayOfCards) { // не сообразил, как оптимизировать фрагмент под разные функции рендера
-  var fragment = document.createDocumentFragment();
 
-  for (var i = 0; i < arrayOfCards.length; ++i) {
-    fragment.appendChild(renderOrderList(arrayOfCards[i]));
-  }
-  return fragment;
-};
-
-renderItemsInContainer(getArrayOfObjects(BASKET_ELEMETS_COUNT), goodsCardsContainer);
+renderItemsInContainer(renderOrderList, getArrayOfObjects(BASKET_ELEMETS_COUNT), goodsCardsContainer);
