@@ -88,12 +88,20 @@ var RATING = {
   }
 };
 var nutritionFacts = {
-  sugar: getRandomInt(0, 1),
+  sugar: function () {
+    return getRandomInt(0, 1);
+  },
   energy: {
     min: 70,
     max: 500
   },
-  contents: getRandomValueFromArray(CONTENTS)
+  contents: function () {
+    var randomContentsArray = [];
+    for (var i = 0; i < getRandomInt(1, CONTENTS.length); ++i) {
+      randomContentsArray.push(getRandomValueFromArray(CONTENTS));
+    }
+    return randomContentsArray;
+  }
 };
 
 var getArrayOfObjects = function (objetsCount) {
@@ -117,16 +125,15 @@ var getArrayOfObjects = function (objetsCount) {
         number: getRandomInt(RATING.number.min, RATING.number.max)
       },
       nutritionFacts: {
-        sugar: nutritionFacts.sugar,
+        sugar: nutritionFacts.sugar(),
         energy: getRandomInt(nutritionFacts.energy.min, nutritionFacts.energy.max),
-        contents: nutritionFacts.contents
+        contents: nutritionFacts.contents()
       }
     };
     goods.push(goodsItem);
   }
   return goods;
 };
-
 // part 2
 var catalog = document.querySelector('.catalog');
 catalog.querySelector('.catalog__cards').classList.remove('catalog__cards--load');
@@ -138,6 +145,7 @@ var cardTemplate = document.querySelector('#card').content.querySelector('.card'
 // create DOM element on template base
 var renderCatalogCard = function (item) {
   var cardItem = cardTemplate.cloneNode(true);
+  var stars = cardItem.querySelector('.stars__rating');
   if (item.amount > 5) {
     cardItem.classList.add('card--in-stock');
   } else if (item.amount >= 1 && item.amount <= 5) {
@@ -155,22 +163,23 @@ var renderCatalogCard = function (item) {
   } else {
     cardItem.querySelector('.card__characteristic').textContent = 'Без сахара';
   }
-  cardItem.querySelector('.card__composition-list').textContent = item.contents;
+  cardItem.querySelector('.card__composition-list').textContent = item.nutritionFacts.contents;
+  cardItem.querySelector('.stars__rating').classList.remove('stars__rating--five');
   switch (item.rating.value) {
     case 1:
-      cardItem.classList.add('.stars__rating--one');
+      stars.classList.add('stars__rating--one');
       break;
     case 2:
-      cardItem.classList.add('.stars__rating--two');
+      stars.classList.add('stars__rating--two');
       break;
     case 3:
-      cardItem.classList.add('.stars__rating--three');
+      stars.classList.add('stars__rating--three');
       break;
     case 4:
-      cardItem.classList.add('.stars__rating--four');
+      stars.classList.add('stars__rating--four');
       break;
     case 5:
-      cardItem.classList.add('.stars__rating--five');
+      stars.classList.add('stars__rating--five');
       break;
   }
   return cardItem;
