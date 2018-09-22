@@ -56,7 +56,7 @@ var IMAGES = [
   'gum-chile.jpg',
   'gum-cedar.jpg'
 ];
-var CATALOG_ELEMETS_COUNT = 26;
+var CATALOG_ELEMETS_COUNT = 6;
 var BASKET_ELEMETS_COUNT = 3;
 var PATH_TO_IMG_DIR = 'img/cards/';
 var getRandomInt = function (min, max) {
@@ -142,9 +142,24 @@ catalog.querySelector('.catalog__load').classList.add('visually-hidden');
 // create card template
 var cardTemplate = document.querySelector('#card').content.querySelector('.card');
 
+var favoriteBtnHandler = function (evt) {
+  evt.preventDefault();
+  this.classList.toggle('card__btn-favorite--selected');
+};
+var orderCardsArray = [];
+
 // create DOM element on template base
 var renderCatalogCard = function (item) {
   var cardItem = cardTemplate.cloneNode(true);
+  cardItem.querySelector('.card__btn-favorite').addEventListener('click', favoriteBtnHandler);
+  cardItem.querySelector('.card__btn').addEventListener('click', function (evt) {
+    evt.preventDefault();
+    orderCardsArray.push(item);
+    var fragment = document.createDocumentFragment();
+    fragment.appendChild(renderOrderList(item));
+    goodsCardsContainer.appendChild(fragment);
+  });
+
   var stars = cardItem.querySelector('.stars__rating');
   if (item.amount > 5) {
     cardItem.classList.add('card--in-stock');
@@ -214,4 +229,5 @@ var renderOrderList = function (item) {
   return cardItem;
 };
 
-renderItemsInContainer(renderOrderList, getArrayOfObjects(BASKET_ELEMETS_COUNT), goodsCardsContainer);
+// renderItemsInContainer(renderOrderList, arr, goodsCardsContainer);
+
