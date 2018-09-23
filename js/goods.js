@@ -142,22 +142,44 @@ catalog.querySelector('.catalog__load').classList.add('visually-hidden');
 // create card template
 var cardTemplate = document.querySelector('#card').content.querySelector('.card');
 
-var favoriteBtnHandler = function (evt) {
+var favoriteButtonHandler = function (evt) {
   evt.preventDefault();
   this.classList.toggle('card__btn-favorite--selected');
 };
 var orderCardsArray = [];
+var basketAmount = 0;
+var mainBasketContainer = document.querySelector('.main-header__basket');
+
 
 // create DOM element on template base
 var renderCatalogCard = function (item) {
   var cardItem = cardTemplate.cloneNode(true);
-  cardItem.querySelector('.card__btn-favorite').addEventListener('click', favoriteBtnHandler);
+  cardItem.querySelector('.card__btn-favorite').addEventListener('click', favoriteButtonHandler);
   cardItem.querySelector('.card__btn').addEventListener('click', function (evt) {
     evt.preventDefault();
-    orderCardsArray.push(item);
-    var fragment = document.createDocumentFragment();
-    fragment.appendChild(renderOrderList(item));
-    goodsCardsContainer.appendChild(fragment);
+    var amount = {orderAmount: 1};
+    var flag = false;
+    for (var i = 0; i < orderCardsArray.length; ++i) {
+      if (orderCardsArray[i].name === item.name) {
+        flag = true;
+        if (item.amount) {
+          orderCardsArray[i].orderAmount++;
+          item.amount--;
+          basketAmount++;
+        }
+      }
+    }
+    if (!flag) {
+      delete item.nutritionFacts;
+      delete item.rating;
+      delete item.weight;
+      item.amount--;
+      basketAmount++;
+      orderCardsArray.push(Object.assign(item, amount));
+    }
+    mainBasketContainer.textContent = basketAmount;
+    goodsCardsContainer.innerHTML = null;
+    renderItemsInContainer(renderOrderList, orderCardsArray, goodsCardsContainer);
   });
 
   var stars = cardItem.querySelector('.stars__rating');
@@ -226,8 +248,39 @@ var renderOrderList = function (item) {
   cardItem.querySelector('.card-order__title').textContent = item.name;
   cardItem.querySelector('.card-order__img').src = item.picture;
   cardItem.querySelector('.card-order__price').textContent = item.price + ' ₽';
+  cardItem.querySelector('.card-order__count').value = item.orderAmount;
   return cardItem;
 };
 
-// renderItemsInContainer(renderOrderList, arr, goodsCardsContainer);
+var store = document.querySelector('.deliver__store');
+var courier = document.querySelector('.deliver__courier');
+// show forms
+var deleveryButton = document.querySelector('.deliver__toggle');
+deleveryButton.addEventListener('click', function (evt) {
+  var target = evt.target.id;
+  if (store.classList.contains(target)) {
+    courier.classList.add('visually-hidden');
+    store.classList.remove('visually-hidden');
+  }
+  if (courier.classList.contains(target)) {
+    store.classList.add('visually-hidden');
+    courier.classList.remove('visually-hidden');
+  }
+});
 
+// range filter
+var rangeFilter = document.querySelector('.range__filter');
+var minRangeButton = rangeFilter.querySelector('.range__btn--left');
+var maxRangeButton = rangeFilter.querySelector('.range__btn--right');
+var rangeFilterWidth = rangeFilter.offsetWidth;
+var minPrice = 0;
+var maxPrice = 100;
+minRangeButton.addEventListener('mouseup', function () {
+  minPrice = minRangeButton.offsetLeft / (rangeFilterWidth / 100);
+  console.log('min ', minPrice, 'max ', maxPrice);
+});
+maxRangeButton.addEventListener('mouseup', function () {
+  maxPrice = (maxRangeButton.offsetLeft + 10) / (rangeFilterWidth / 100);
+  console.log('min ', minPrice, 'max ', maxPrice);
+});
+console.log('min ', minPrice, 'max ', maxPrice);
