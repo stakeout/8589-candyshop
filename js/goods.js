@@ -147,39 +147,44 @@ var favoriteButtonHandler = function (evt) {
   this.classList.toggle('card__btn-favorite--selected');
 };
 var orderCardsArray = [];
-var basketAmount = 0;
 var mainBasketContainer = document.querySelector('.main-header__basket');
+var basketAmount = 0;
 
+var addItemToOrder = function (item) {
+  var amount = {orderAmount: 1};
+  var flag = false;
 
+  for (var i = 0; i < orderCardsArray.length; ++i) {
+    if (orderCardsArray[i].name === item.name) {
+      flag = true;
+      if (item.amount) {
+        orderCardsArray[i].orderAmount++;
+        item.amount--;
+        basketAmount++;
+      }
+    }
+  }
+  if (!flag) {
+    orderCardsArray.push(Object.assign({}, item, amount));
+    orderCardsArray.forEach(function (element) {
+      delete element.nutritionFacts;
+      delete element.rating;
+      delete element.weight;
+    });
+    item.amount--;
+    basketAmount++;
+  }
+  mainBasketContainer.textContent = basketAmount;
+  goodsCardsContainer.innerHTML = null;
+  renderItemsInContainer(renderOrderList, orderCardsArray, goodsCardsContainer);
+};
 // create DOM element on template base
 var renderCatalogCard = function (item) {
   var cardItem = cardTemplate.cloneNode(true);
   cardItem.querySelector('.card__btn-favorite').addEventListener('click', favoriteButtonHandler);
   cardItem.querySelector('.card__btn').addEventListener('click', function (evt) {
     evt.preventDefault();
-    var amount = {orderAmount: 1};
-    var flag = false;
-    for (var i = 0; i < orderCardsArray.length; ++i) {
-      if (orderCardsArray[i].name === item.name) {
-        flag = true;
-        if (item.amount) {
-          orderCardsArray[i].orderAmount++;
-          item.amount--;
-          basketAmount++;
-        }
-      }
-    }
-    if (!flag) {
-      delete item.nutritionFacts;
-      delete item.rating;
-      delete item.weight;
-      item.amount--;
-      basketAmount++;
-      orderCardsArray.push(Object.assign(item, amount));
-    }
-    mainBasketContainer.textContent = basketAmount;
-    goodsCardsContainer.innerHTML = null;
-    renderItemsInContainer(renderOrderList, orderCardsArray, goodsCardsContainer);
+    addItemToOrder(item);
   });
 
   var stars = cardItem.querySelector('.stars__rating');
@@ -284,3 +289,6 @@ maxRangeButton.addEventListener('mouseup', function () {
   console.log('min ', minPrice, 'max ', maxPrice);
 });
 console.log('min ', minPrice, 'max ', maxPrice);
+
+// form validity
+2222222222222222222222222222222222222222222222222222222222222222222222222222222
