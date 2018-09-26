@@ -56,7 +56,7 @@ var IMAGES = [
   'gum-chile.jpg',
   'gum-cedar.jpg'
 ];
-var CATALOG_ELEMETS_COUNT = 6;
+var CATALOG_ELEMENTS_COUNT = 6;
 var PATH_TO_IMG_DIR = 'img/cards/';
 var getRandomInt = function (min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -143,20 +143,17 @@ var cardTemplate = document.querySelector('#card').content.querySelector('.card'
 
 var orderCardsArray = [];
 
-var addToTopBasket = function (array, str) {
+var setTopBasketContent = function (orderItemsArray) {
   var basketAmount = 0;
   var basketElementsPrice = 0;
   var mainBasketContainer = document.querySelector('.main-header__basket');
-  array.forEach(function (elem) {
+  orderItemsArray.forEach(function (elem) {
     basketAmount += elem.orderAmount;
     if (elem.orderAmount >= 1) {
       basketElementsPrice += elem.price * elem.orderAmount;
     }
   });
-  if (str) {
-    mainBasketContainer.textContent = 'Сейчас в корзине ' + basketAmount + ' товаров на сумму ' + basketElementsPrice;
-  }
-  mainBasketContainer.textContent = basketAmount;
+  mainBasketContainer.textContent = 'Сейчас в корзине ' + basketAmount + ' товаров на сумму ' + basketElementsPrice + ' ₽';
 };
 
 var addItemToOrder = function (item) {
@@ -168,7 +165,7 @@ var addItemToOrder = function (item) {
       if (orderCardsArray[i].orderAmount < item.amount) {
         orderCardsArray[i].orderAmount++;
       }
-      addToTopBasket(orderCardsArray);
+      setTopBasketContent(orderCardsArray);
     }
   }
   if (!flag) {
@@ -177,7 +174,7 @@ var addItemToOrder = function (item) {
     delete clikedCatalogCardElement.rating;
     delete clikedCatalogCardElement.weight;
     orderCardsArray.push(clikedCatalogCardElement);
-    addToTopBasket(orderCardsArray);
+    setTopBasketContent(orderCardsArray);
   }
   goodsCardsContainer.innerHTML = null;
   renderItemsInContainer(renderOrderList, orderCardsArray, goodsCardsContainer);
@@ -249,7 +246,7 @@ var renderItemsInContainer = function (renderFunction, arrayOfCardsObjects, clas
   classOfContainer.appendChild(getFragment(renderFunction, arrayOfCardsObjects));
 };
 
-renderItemsInContainer(renderCatalogCard, getArrayOfObjects(CATALOG_ELEMETS_COUNT), catalogCardsContainer);
+renderItemsInContainer(renderCatalogCard, getArrayOfObjects(CATALOG_ELEMENTS_COUNT), catalogCardsContainer);
 
 // part 3
 var orderCardTemplate = document.querySelector('#card-order').content.querySelector('.card-order');
@@ -288,9 +285,9 @@ var rangeFilterWidth = rangeFilter.offsetWidth;
 var minPrice = document.querySelector('.range__price--min');
 var maxPrice = document.querySelector('.range__price--max');
 minRangeButton.addEventListener('mouseup', function () {
-  minPrice.textContent = minRangeButton.offsetLeft / (rangeFilterWidth / 100);
+  minPrice.textContent = Math.floor(minRangeButton.offsetLeft / (rangeFilterWidth / 100));
 });
 maxRangeButton.addEventListener('mouseup', function () {
-  maxPrice.textContent = (maxRangeButton.offsetLeft + 10) / (rangeFilterWidth / 100);
+  maxPrice.textContent = Math.floor((maxRangeButton.offsetLeft + 10) / (rangeFilterWidth / 100));
 });
 
