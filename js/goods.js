@@ -57,7 +57,6 @@ var IMAGES = [
   'gum-cedar.jpg'
 ];
 var CATALOG_ELEMETS_COUNT = 6;
-var BASKET_ELEMETS_COUNT = 3;
 var PATH_TO_IMG_DIR = 'img/cards/';
 var getRandomInt = function (min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -142,46 +141,54 @@ catalog.querySelector('.catalog__load').classList.add('visually-hidden');
 // create card template
 var cardTemplate = document.querySelector('#card').content.querySelector('.card');
 
-var favoriteButtonHandler = function (evt) {
-  evt.preventDefault();
-  this.classList.toggle('card__btn-favorite--selected');
-};
 var orderCardsArray = [];
-var mainBasketContainer = document.querySelector('.main-header__basket');
-var basketAmount = 0;
+
+var addToTopBasket = function (array, str) {
+  var basketAmount = 0;
+  var basketElementsPrice = 0;
+  var mainBasketContainer = document.querySelector('.main-header__basket');
+  array.forEach(function (elem) {
+    basketAmount += elem.orderAmount;
+    if (elem.orderAmount >= 1) {
+      basketElementsPrice += elem.price * elem.orderAmount;
+    }
+  });
+  if (str) {
+    mainBasketContainer.textContent = 'Сейчас в корзине ' + basketAmount + ' товаров на сумму ' + basketElementsPrice;
+  }
+  mainBasketContainer.textContent = basketAmount;
+};
 
 var addItemToOrder = function (item) {
   var amount = {orderAmount: 1};
   var flag = false;
-
   for (var i = 0; i < orderCardsArray.length; ++i) {
     if (orderCardsArray[i].name === item.name) {
       flag = true;
-      if (item.amount) {
+      if (orderCardsArray[i].orderAmount < item.amount) {
         orderCardsArray[i].orderAmount++;
-        item.amount--;
-        basketAmount++;
       }
+      addToTopBasket(orderCardsArray);
     }
   }
   if (!flag) {
-    orderCardsArray.push(Object.assign({}, item, amount));
-    orderCardsArray.forEach(function (element) {
-      delete element.nutritionFacts;
-      delete element.rating;
-      delete element.weight;
-    });
-    item.amount--;
-    basketAmount++;
+    var clikedCatalogCardElement = Object.assign({}, item, amount);
+    delete clikedCatalogCardElement.nutritionFacts;
+    delete clikedCatalogCardElement.rating;
+    delete clikedCatalogCardElement.weight;
+    orderCardsArray.push(clikedCatalogCardElement);
+    addToTopBasket(orderCardsArray);
   }
-  mainBasketContainer.textContent = basketAmount;
   goodsCardsContainer.innerHTML = null;
   renderItemsInContainer(renderOrderList, orderCardsArray, goodsCardsContainer);
 };
 // create DOM element on template base
 var renderCatalogCard = function (item) {
   var cardItem = cardTemplate.cloneNode(true);
-  cardItem.querySelector('.card__btn-favorite').addEventListener('click', favoriteButtonHandler);
+  cardItem.querySelector('.card__btn-favorite').addEventListener('click', function (evt) {
+    evt.preventDefault();
+    this.classList.toggle('card__btn-favorite--selected');
+  });
   cardItem.querySelector('.card__btn').addEventListener('click', function (evt) {
     evt.preventDefault();
     addItemToOrder(item);
@@ -257,20 +264,18 @@ var renderOrderList = function (item) {
   return cardItem;
 };
 
-var store = document.querySelector('.deliver__store');
-var courier = document.querySelector('.deliver__courier');
 // show forms
-var deleveryButton = document.querySelector('.deliver__toggle');
+var delivery = document.querySelector('.deliver');
+var deleveryButton = delivery.querySelector('.deliver__toggle');
 deleveryButton.addEventListener('click', function (evt) {
   var target = evt.target.id;
-  if (store.classList.contains(target)) {
-    courier.classList.add('visually-hidden');
-    store.classList.remove('visually-hidden');
-  }
-  if (courier.classList.contains(target)) {
-    store.classList.add('visually-hidden');
-    courier.classList.remove('visually-hidden');
-  }
+  var deliveryTabs = delivery.querySelectorAll('div[data-name=delivery]');
+  deliveryTabs.forEach(function (elem) {
+    elem.classList.add('visually-hidden');
+    if (elem.classList.contains(target)) {
+      elem.classList.remove('visually-hidden');
+    }
+  });
 });
 
 // range filter
@@ -278,17 +283,12 @@ var rangeFilter = document.querySelector('.range__filter');
 var minRangeButton = rangeFilter.querySelector('.range__btn--left');
 var maxRangeButton = rangeFilter.querySelector('.range__btn--right');
 var rangeFilterWidth = rangeFilter.offsetWidth;
-var minPrice = 0;
-var maxPrice = 100;
+var minPrice = document.querySelector('.range__price--min');
+var maxPrice = document.querySelector('.range__price--max');
 minRangeButton.addEventListener('mouseup', function () {
-  minPrice = minRangeButton.offsetLeft / (rangeFilterWidth / 100);
-  console.log('min ', minPrice, 'max ', maxPrice);
+  minPrice.textContent = minRangeButton.offsetLeft / (rangeFilterWidth / 100);
 });
 maxRangeButton.addEventListener('mouseup', function () {
-  maxPrice = (maxRangeButton.offsetLeft + 10) / (rangeFilterWidth / 100);
-  console.log('min ', minPrice, 'max ', maxPrice);
+  maxPrice.textContent = (maxRangeButton.offsetLeft + 10) / (rangeFilterWidth / 100);
 });
-console.log('min ', minPrice, 'max ', maxPrice);
 
-// form validity
-2222222222222222222222222222222222222222222222222222222222222222222222222222222
