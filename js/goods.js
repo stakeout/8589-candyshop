@@ -182,12 +182,14 @@ var addItemToOrder = function (item) {
   goodsCardsContainer.innerHTML = null;
   renderItemsInContainer(renderOrderList, orderCardsArray, goodsCardsContainer);
 };
+
 // create DOM element on template base
 var renderCatalogCard = function (item) {
   var cardItem = cardTemplate.cloneNode(true);
-  cardItem.querySelector('.card__btn-favorite').addEventListener('click', function (evt) {
+  var cardElementFavorite = cardItem.querySelector('.card__btn-favorite');
+  cardElementFavorite.addEventListener('click', function (evt) {
     evt.preventDefault();
-    this.classList.toggle('card__btn-favorite--selected');
+    cardElementFavorite.classList.toggle('card__btn-favorite--selected');
   });
   cardItem.querySelector('.card__btn').addEventListener('click', function (evt) {
     evt.preventDefault();
