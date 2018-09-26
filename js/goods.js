@@ -56,8 +56,7 @@ var IMAGES = [
   'gum-chile.jpg',
   'gum-cedar.jpg'
 ];
-var CATALOG_ELEMETS_COUNT = 26;
-var BASKET_ELEMETS_COUNT = 3;
+var CATALOG_ELEMENTS_COUNT = 6;
 var PATH_TO_IMG_DIR = 'img/cards/';
 var getRandomInt = function (min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -142,9 +141,58 @@ catalog.querySelector('.catalog__load').classList.add('visually-hidden');
 // create card template
 var cardTemplate = document.querySelector('#card').content.querySelector('.card');
 
+var orderCardsArray = [];
+
+var setTopBasketContent = function (orderItemsArray) {
+  var basketAmount = 0;
+  var basketElementsPrice = 0;
+  var mainBasketContainer = document.querySelector('.main-header__basket');
+  orderItemsArray.forEach(function (elem) {
+    basketAmount += elem.orderAmount;
+    if (elem.orderAmount >= 1) {
+      basketElementsPrice += elem.price * elem.orderAmount;
+    }
+  });
+  mainBasketContainer.textContent = 'Сейчас в корзине ' + basketAmount + ' товаров на сумму ' + basketElementsPrice + ' ₽';
+};
+
+var addItemToOrder = function (item) {
+  var amount = {orderAmount: 1};
+  var flag = false;
+  for (var i = 0; i < orderCardsArray.length; ++i) {
+    if (orderCardsArray[i].name === item.name) {
+      flag = true;
+      if (orderCardsArray[i].orderAmount < item.amount) {
+        orderCardsArray[i].orderAmount++;
+      }
+      setTopBasketContent(orderCardsArray);
+    }
+  }
+  if (!flag) {
+    var clikedCatalogCardElement = Object.assign({}, item, amount);
+    delete clikedCatalogCardElement.nutritionFacts;
+    delete clikedCatalogCardElement.rating;
+    delete clikedCatalogCardElement.weight;
+    orderCardsArray.push(clikedCatalogCardElement);
+    setTopBasketContent(orderCardsArray);
+  }
+  goodsCardsContainer.innerHTML = null;
+  renderItemsInContainer(renderOrderList, orderCardsArray, goodsCardsContainer);
+};
+
 // create DOM element on template base
 var renderCatalogCard = function (item) {
   var cardItem = cardTemplate.cloneNode(true);
+  var cardElementFavorite = cardItem.querySelector('.card__btn-favorite');
+  cardElementFavorite.addEventListener('click', function (evt) {
+    evt.preventDefault();
+    cardElementFavorite.classList.toggle('card__btn-favorite--selected');
+  });
+  cardItem.querySelector('.card__btn').addEventListener('click', function (evt) {
+    evt.preventDefault();
+    addItemToOrder(item);
+  });
+
   var stars = cardItem.querySelector('.stars__rating');
   if (item.amount > 5) {
     cardItem.classList.add('card--in-stock');
@@ -198,7 +246,7 @@ var renderItemsInContainer = function (renderFunction, arrayOfCardsObjects, clas
   classOfContainer.appendChild(getFragment(renderFunction, arrayOfCardsObjects));
 };
 
-renderItemsInContainer(renderCatalogCard, getArrayOfObjects(CATALOG_ELEMETS_COUNT), catalogCardsContainer);
+renderItemsInContainer(renderCatalogCard, getArrayOfObjects(CATALOG_ELEMENTS_COUNT), catalogCardsContainer);
 
 // part 3
 var orderCardTemplate = document.querySelector('#card-order').content.querySelector('.card-order');
@@ -211,7 +259,35 @@ var renderOrderList = function (item) {
   cardItem.querySelector('.card-order__title').textContent = item.name;
   cardItem.querySelector('.card-order__img').src = item.picture;
   cardItem.querySelector('.card-order__price').textContent = item.price + ' ₽';
+  cardItem.querySelector('.card-order__count').value = item.orderAmount;
   return cardItem;
 };
 
-renderItemsInContainer(renderOrderList, getArrayOfObjects(BASKET_ELEMETS_COUNT), goodsCardsContainer);
+// show forms
+var delivery = document.querySelector('.deliver');
+var deleveryButton = delivery.querySelector('.deliver__toggle');
+deleveryButton.addEventListener('click', function (evt) {
+  var target = evt.target.id;
+  var deliveryTabs = delivery.querySelectorAll('div[data-name=delivery]');
+  deliveryTabs.forEach(function (elem) {
+    elem.classList.add('visually-hidden');
+    if (elem.classList.contains(target)) {
+      elem.classList.remove('visually-hidden');
+    }
+  });
+});
+
+// range filter
+var rangeFilter = document.querySelector('.range__filter');
+var minRangeButton = rangeFilter.querySelector('.range__btn--left');
+var maxRangeButton = rangeFilter.querySelector('.range__btn--right');
+var rangeFilterWidth = rangeFilter.offsetWidth;
+var minPrice = document.querySelector('.range__price--min');
+var maxPrice = document.querySelector('.range__price--max');
+minRangeButton.addEventListener('mouseup', function () {
+  minPrice.textContent = Math.floor(minRangeButton.offsetLeft / (rangeFilterWidth / 100));
+});
+maxRangeButton.addEventListener('mouseup', function () {
+  maxPrice.textContent = Math.floor((maxRangeButton.offsetLeft + 10) / (rangeFilterWidth / 100));
+});
+
