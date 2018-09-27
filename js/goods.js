@@ -311,11 +311,11 @@ var luhnAlgorithm = function (cardNumber) {
 var cardStatus = document.querySelector('.payment__card-status');
 var cardNumberField = document.querySelector('#payment__card-number');
 cardNumberField.addEventListener('input', function () {
+  var regex = /[^0-9 ]/;
+  cardNumberField.value = cardNumberField.value.replace(regex, '');
   var result = luhnAlgorithm(cardNumberField.value);
   if (result && cardNumberField.value !== '') {
-    if (cardNumberField.length >= 14 && cardNumberField.length <= 16) {
-      cardStatus.textContent = 'Определен';
-    }
+    cardStatus.textContent = 'Определен';
   } else {
     cardStatus.textContent = 'НЕ определен';
   }
