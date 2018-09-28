@@ -291,3 +291,41 @@ maxRangeButton.addEventListener('mouseup', function () {
   maxPrice.textContent = Math.floor((maxRangeButton.offsetLeft + 10) / (rangeFilterWidth / 100));
 });
 
+// luhn algorithm
+var luhnAlgorithm = function (cardNumber) {
+  if (!cardNumber.length) {
+    return false;
+  }
+  var numbers = cardNumber.split('');
+  var array = [];
+  for (var i = 0; i < numbers.length; ++i) {
+    if (numbers[i] % 2 !== 0) {
+      var even = parseInt(numbers[i] * 2, 10);
+      if (even > 9) {
+        array.push(even - 9);
+      } else {
+        array.push(even, 10);
+      }
+    } else {
+      var odd = parseInt(numbers[i], 10);
+      array.push(odd);
+    }
+  }
+  var total = array.reduce(function (a, b) {
+    return a + b;
+  });
+  return Boolean(total % 10 !== 0);
+};
+
+var cardStatus = document.querySelector('.payment__card-status');
+var cardNumberField = document.querySelector('#payment__card-number');
+cardNumberField.addEventListener('input', function () {
+  var regex = /[^0-9 ]/;
+  cardNumberField.value = cardNumberField.value.replace(regex, '');
+  var result = luhnAlgorithm(cardNumberField.value);
+  if (result && cardNumberField.value !== '') {
+    cardStatus.textContent = 'Определен';
+  } else {
+    cardStatus.textContent = 'НЕ определен';
+  }
+});
